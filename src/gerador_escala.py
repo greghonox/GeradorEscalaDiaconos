@@ -26,7 +26,9 @@ class GeradorEscalaDiaconos:
         "sabado": 5,  # 5=sábado
     }
 
-    def __init__(self, lista_diaconos: List[str], seed: Optional[int] = None):
+    def __init__(
+        self, lista_diaconos: List[Tuple[str, str]], seed: Optional[int] = None
+    ):
         """
         Inicializa o gerador de escala.
 
@@ -37,7 +39,10 @@ class GeradorEscalaDiaconos:
         if not lista_diaconos:
             raise ValueError("A lista de diáconos não pode estar vazia")
 
-        self.lista_diaconos = lista_diaconos.copy()
+        self.lista_diaconos = [nome for nome, _ in lista_diaconos]
+        self.lista_diaconos_contatos = {
+            nome: contato for nome, contato in lista_diaconos
+        }
         self.escala_gerada: List[DiaconoEscala] = []
         # Rastreamento de rotação circular para função "chave"
         self._chaves_usadas: List[str] = []
