@@ -11,6 +11,19 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Streamlit Gerador de Escala para Diáconos",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/streamlit",
+            "args": [
+                "--log_level",
+                "debug",
+                "run",
+                "${workspaceFolder}/app.py",
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }

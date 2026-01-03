@@ -49,8 +49,10 @@ class GeradorEscalaDiaconos:
         # Mapeia a data do sábado para o diácono escolhido para chave
         self._chave_semanal: Dict[date, str] = {}
 
-        if seed is not None:
-            random.seed(seed)
+        if seed is None:
+            seed = random.randint(1, 1000000)
+        self.seed = seed
+        random.seed(seed)
 
     def _sortear_diacono(self, diaconos_disponiveis: List[str]) -> str:
         """

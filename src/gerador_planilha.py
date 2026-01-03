@@ -51,6 +51,7 @@ class GeradorPlanilha:
         escala: List[DiaconoEscala],
         ano: int,
         lista_diaconos: List[Tuple[str, str]],
+        seed: Optional[int] = None,
     ):
         """
         Inicializa o gerador de planilha.
@@ -78,6 +79,7 @@ class GeradorPlanilha:
 
         # Gera mapeamento de cores para cada diácono
         self._cores_diaconos = self._gerar_cores_diaconos()
+        self.seed = seed
 
     def _organizar_escala_por_data(
         self,
@@ -397,14 +399,18 @@ class GeradorPlanilha:
         """
         Adiciona informação de horário de chegada do responsável.
         """
+        row = 20
         information_text = "Horário de chegada do responsável deve ser pelo menos 30 minutos antes do horário marcado para o início de cada programação."
-        ws.cell(row=21, column=1).alignment = Alignment(
-            horizontal="center", vertical="center", wrap_text=True
+        ws.cell(row=row, column=1).alignment = Alignment(
+            horizontal="left", vertical="center", wrap_text=True
         )
-        ws.cell(row=21, column=1, value=information_text).font = Font(
-            bold=True, size=10, color="000000"
+        ws.cell(row=row, column=1, value=information_text).font = Font(
+            bold=True, size=12, color="FFFFFF"
         )
-        ws.merge_cells("A21:D23")
+        ws.cell(row=row, column=1).fill = PatternFill(
+            start_color="000000", end_color="000000", fill_type="solid"
+        )
+        ws.merge_cells(f"A{row}:E24")
 
     def _adicionar_contato_responsavel(self, ws):
         """
@@ -413,6 +419,10 @@ class GeradorPlanilha:
         """
         column_start = 7
         max_rows = 20
+        font_title = Font(bold=True, size=12, color="FFFFFF")
+        background_title = PatternFill(
+            start_color="000000", end_color="000000", fill_type="solid"
+        )
         font_name = Font(bold=True, size=10, color="000000")
         border_name = Border(
             left=Side(style="thin"),
@@ -420,17 +430,18 @@ class GeradorPlanilha:
             top=Side(style="thin"),
             bottom=Side(style="thin"),
         )
-        alignment_name = Alignment(
-            horizontal="center", vertical="center", wrap_text=True
-        )
-        ws.cell(row=max_rows, column=column_start, value="Nome").font = font_name
+        alignment_name = Alignment(horizontal="left", vertical="center", wrap_text=True)
+        ws.cell(row=max_rows, column=column_start, value="Nome").font = font_title
         ws.cell(row=max_rows, column=column_start).border = border_name
         ws.cell(row=max_rows, column=column_start).alignment = alignment_name
+        ws.cell(row=max_rows, column=column_start).fill = background_title
+
         ws.cell(row=max_rows, column=column_start + 2, value="Telefone").font = (
-            font_name
+            font_title
         )
         ws.cell(row=max_rows, column=column_start + 2).border = border_name
         ws.cell(row=max_rows, column=column_start + 2).alignment = alignment_name
+        ws.cell(row=max_rows, column=column_start + 2).fill = background_title
         ws.merge_cells(
             f"{get_column_letter(column_start)}{max_rows}:{get_column_letter(column_start + 1)}{max_rows}"
         )
@@ -581,6 +592,7 @@ class GeradorPlanilha:
 
             # Adiciona uma linha em branco entre meses para melhor visualização
             row += 1
+        ws.cell(row=17, column=1, value=f"Seed: {self.seed}")
 
     def gerar_planilha(self, caminho_arquivo: str) -> None:
         """

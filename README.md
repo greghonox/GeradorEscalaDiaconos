@@ -21,9 +21,25 @@ poetry shell
 
 ## Uso
 
+### Interface Web (Streamlit) - Recomendado
+
+Execute a aplicação Streamlit:
+```bash
+poetry run streamlit run app.py
+```
+
+A aplicação abrirá automaticamente no navegador. Você poderá:
+- Gerenciar a lista de diáconos (adicionar/remover)
+- Configurar o ano da escala
+- Gerar a escala anual
+- Visualizar a escala em diferentes formatos
+- Baixar a planilha Excel gerada
+
+### Linha de Comando
+
 Execute o módulo principal:
 ```bash
-poetry run python -m src.main
+poetry run python main.py
 ```
 
 ## Desenvolvimento
@@ -50,9 +66,12 @@ poetry update
 
 ```
 GeradorEscalaDiaconos/
-├── src/  # Pacote principal
+├── src/                      # Pacote principal
 │   ├── __init__.py
-│   └── main.py
+│   ├── gerador_escala.py     # Lógica de geração de escala
+│   └── gerador_planilha.py   # Geração de planilhas Excel
+├── app.py                    # Interface web Streamlit
+├── main.py                   # Script de linha de comando
 ├── pyproject.toml            # Configuração do Poetry
 ├── poetry.lock               # Lock file das dependências
 └── README.md
