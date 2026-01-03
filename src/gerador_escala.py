@@ -67,7 +67,11 @@ class GeradorEscalaDiaconos:
         if not diaconos_disponiveis:
             raise ValueError("Não há diáconos disponíveis para sorteio")
 
-        return random.choice(diaconos_disponiveis)
+        diacono = random.choice(diaconos_disponiveis)
+        if diacono == self.lista_diaconos[-1]:
+            self._remover_diacono(diaconos_disponiveis, diacono)
+            return self._sortear_diacono(diaconos_disponiveis)
+        return diacono
 
     def _remover_diacono(self, lista: List[str], nome: str) -> List[str]:
         """
@@ -139,8 +143,9 @@ class GeradorEscalaDiaconos:
             self._chaves_usadas = []
             diaconos_disponiveis = self.lista_diaconos.copy()
 
-        # Sorteia um dos disponíveis
-        escolhido = random.choice(diaconos_disponiveis)
+        # Em vez de sortear aleatoriamente, escolhe o primeiro da lista
+        # Isso garante que todos sejam escolhidos antes de qualquer repetição
+        escolhido = diaconos_disponiveis[0]
         self._chaves_usadas.append(escolhido)
 
         return escolhido
