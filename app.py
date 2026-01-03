@@ -113,7 +113,9 @@ def main():
             st.info(f"Seed usado: {st.session_state.seed}")
 
     # Abas principais
-    tab1, tab2, tab3 = st.tabs(["👥 Diáconos", "📅 Escala", "📊 Visualização"])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["👥 Diáconos", "📅 Escala", "📊 Visualização", "📞 Contatos"]
+    )
 
     # Aba 1: Gerenciamento de Diáconos
     with tab1:
@@ -330,6 +332,80 @@ def main():
                 )
             else:
                 st.warning("Nenhum evento encontrado com os filtros selecionados.")
+
+    # Aba 4: Contatos
+    with tab4:
+        st.header("📞 Contatos")
+
+        st.markdown(
+            """
+        ### Informações de Contato:
+        __Esse aplicativo foi desenvolvido para facilitar a geração
+        e gerenciamento de escalas para diáconos com a escala parecida com o da _Igreja Adventista do Sétimo Dia_.__
+
+        Para dúvidas, sugestões ou suporte relacionado ao Gerador de
+        Escala para Diáconos, entre em contato através dos canais abaixo.
+        """
+        )
+
+        col_contato1, col_contato2 = st.columns(2)
+
+        with col_contato1:
+            st.subheader("👤 Desenvolvedor")
+            st.markdown(
+                """
+            **Gregório Honorato**
+
+            **Desenvolvedor:**
+
+            📧 Email: greghono@gmail.com
+
+            📱 WhatsApp: [__19 99250-9913__](https://wa.me/5519992509913)
+
+            📱 Telegram: __@greghono__
+
+            📱 LinkedIn: https://www.linkedin.com/in/greghono/
+
+            📱 GitHub: https://github.com/greghonox
+
+            📱 YouTube: [__@greghono__](https://www.youtube.com/@GregorioHonorato)
+
+            """
+            )
+
+        with col_contato2:
+            st.subheader("ℹ️ Sobre o Aplicativo")
+            st.markdown(
+                """**Gerador de Escala para Diáconos**
+
+            Versão: 1.0
+
+            **Este aplicativo foi desenvolvido para facilitar a geração
+            e gerenciamento de escalas para diáconos.**
+            """
+            )
+
+        st.markdown("---")
+
+        st.subheader("📝 Sugestões e Melhorias")
+        st.info(
+            """
+        Se você tiver sugestões de melhorias ou encontrar algum problema,
+        entre em contato através do telefone informado acima.
+        """
+        )
+
+        st.markdown("---")
+
+        st.subheader("📚 Documentação")
+        st.markdown(
+            """
+        Para mais informações sobre como usar o aplicativo, consulte:
+        - A aba **👥 Diáconos** para gerenciar a lista de diáconos
+        - A aba **📅 Escala** para gerar e baixar a escala
+        - A aba **📊 Visualização** para análises detalhadas da escala
+        """
+        )
 
 
 if __name__ == "__main__":
