@@ -4,6 +4,7 @@ import streamlit as st
 import io
 from datetime import date
 
+from src.carregar_diaconos import carregar_diaconos
 from src.gerador_escala import GeradorEscalaDiaconos
 from src.gerador_planilha import GeradorPlanilha
 
@@ -11,11 +12,7 @@ from src.gerador_planilha import GeradorPlanilha
 def inicializar_sessao():
     """Inicializa variáveis de sessão se não existirem."""
     if "diaconos" not in st.session_state:
-        st.session_state.diaconos = [
-            ("Gregório Honorato", "19 99250-9913"),
-            ("Diacono Teste", "19 99999-9999"),
-            ("Diacono Teste 2", "19 99999-9999"),
-        ]
+        st.session_state.diaconos = carregar_diaconos()
     if "escala_gerada" not in st.session_state:
         st.session_state.escala_gerada = None
     if "ano" not in st.session_state:

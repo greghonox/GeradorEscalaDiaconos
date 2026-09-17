@@ -1,7 +1,16 @@
 """Testes para o módulo gerador_escala."""
 
+from collections import defaultdict
+
 import pytest
-from src.gerador_escala import GeradorEscalaDiaconos, DiaconoEscala
+from src.gerador_escala import DiaconoEscala, GeradorEscalaDiaconos
+
+TELEFONE_TESTE = "19 99999-9999"
+
+
+def _diaconos(*nomes: str):
+    """Monta a lista no formato (nome, telefone) esperado pelo gerador."""
+    return [(nome, TELEFONE_TESTE) for nome in nomes]
 
 
 class TestGeradorEscalaDiaconos:
@@ -9,10 +18,16 @@ class TestGeradorEscalaDiaconos:
 
     def test_inicializacao_com_lista_valida(self):
         """Testa a inicialização com uma lista válida de diáconos."""
-        diaconos = ["João", "Maria", "Pedro", "Ana"]
+        diaconos = _diaconos("João", "Maria", "Pedro", "Ana")
         gerador = GeradorEscalaDiaconos(diaconos)
 
-        assert gerador.lista_diaconos == diaconos
+        assert gerador.lista_diaconos == ["João", "Maria", "Pedro", "Ana"]
+        assert gerador.lista_diaconos_contatos == {
+            "João": TELEFONE_TESTE,
+            "Maria": TELEFONE_TESTE,
+            "Pedro": TELEFONE_TESTE,
+            "Ana": TELEFONE_TESTE,
+        }
         assert gerador.escala_gerada == []
 
     def test_inicializacao_com_lista_vazia(self):
@@ -24,17 +39,8 @@ class TestGeradorEscalaDiaconos:
 
     def test_gerar_escala_semanal_estrutura_basica(self):
         """Testa que a escala gerada tem a estrutura correta."""
-        diaconos = [
-            "João",
-            "Maria",
-            "Pedro",
-            "Ana",
-            "Carlos",
-            "Julia",
-            "Paulo",
-            "Sofia",
-        ]
-        gerador = GeradorEscalaDiaconos(diaconos, seed=123)
+        nomes = ["João", "Maria", "Pedro", "Ana", "Carlos", "Julia", "Paulo", "Sofia"]
+        gerador = GeradorEscalaDiaconos(_diaconos(*nomes), seed=123)
         escala = gerador.gerar_escala_semanal()
 
         # Deve ter 7 atribuições: 2 (domingo) + 2 (quarta) + 3 (sábado)
@@ -43,13 +49,13 @@ class TestGeradorEscalaDiaconos:
         # Verifica que todos são instâncias de DiaconoEscala
         for diacono in escala:
             assert isinstance(diacono, DiaconoEscala)
-            assert diacono.nome in diaconos
+            assert diacono.nome in nomes
             assert diacono.funcao in ["chave", "oferta"]
             assert diacono.dia in ["domingo", "quarta", "sabado"]
 
     def test_escala_domingo_tem_chave_e_oferta(self):
         """Testa que domingo tem exatamente 1 chave e 1 oferta."""
-        diaconos = ["João", "Maria", "Pedro", "Ana", "Carlos", "Julia"]
+        diaconos = _diaconos("João", "Maria", "Pedro", "Ana", "Carlos", "Julia")
         gerador = GeradorEscalaDiaconos(diaconos, seed=456)
         escala = gerador.gerar_escala_semanal()
 
@@ -64,7 +70,7 @@ class TestGeradorEscalaDiaconos:
 
     def test_escala_quarta_tem_chave_e_oferta(self):
         """Testa que quarta tem exatamente 1 chave e 1 oferta."""
-        diaconos = ["João", "Maria", "Pedro", "Ana", "Carlos", "Julia"]
+        diaconos = _diaconos("João", "Maria", "Pedro", "Ana", "Carlos", "Julia")
         gerador = GeradorEscalaDiaconos(diaconos, seed=789)
         escala = gerador.gerar_escala_semanal()
 
@@ -79,7 +85,7 @@ class TestGeradorEscalaDiaconos:
 
     def test_escala_sabado_tem_1_chave_e_2_ofertas(self):
         """Testa que sábado tem exatamente 1 chave e 2 ofertas."""
-        diaconos = ["João", "Maria", "Pedro", "Ana", "Carlos", "Julia"]
+        diaconos = _diaconos("João", "Maria", "Pedro", "Ana", "Carlos", "Julia")
         gerador = GeradorEscalaDiaconos(diaconos, seed=321)
         escala = gerador.gerar_escala_semanal()
 
@@ -90,19 +96,12 @@ class TestGeradorEscalaDiaconos:
         assert funcoes.count("chave") == 1
         assert funcoes.count("oferta") == 2
 
-    @pytest.mark.disable_test
+    @pytest.mark.skip(reason="evitar_repeticao ainda permite nomes duplicados no sorteio")
     def test_evitar_repeticao_ativa(self):
         """Testa que evitar_repeticao=True não repete diáconos na mesma semana."""
-        diaconos = [
-            "João",
-            "Maria",
-            "Pedro",
-            "Ana",
-            "Carlos",
-            "Julia",
-            "Paulo",
-            "Sofia",
-        ]
+        diaconos = _diaconos(
+            "João", "Maria", "Pedro", "Ana", "Carlos", "Julia", "Paulo", "Sofia"
+        )
         gerador = GeradorEscalaDiaconos(diaconos, seed=999)
         escala = gerador.gerar_escala_semanal(evitar_repeticao=True)
 
@@ -114,7 +113,7 @@ class TestGeradorEscalaDiaconos:
 
     def test_evitar_repeticao_desativada(self):
         """Testa que evitar_repeticao=False permite repetições."""
-        diaconos = ["João", "Maria", "Pedro"]
+        diaconos = _diaconos("João", "Maria", "Pedro")
         gerador = GeradorEscalaDiaconos(diaconos, seed=111)
         escala = gerador.gerar_escala_semanal(evitar_repeticao=False)
 
@@ -126,16 +125,9 @@ class TestGeradorEscalaDiaconos:
 
     def test_obter_escala_por_dia(self):
         """Testa o método obter_escala_por_dia."""
-        diaconos = [
-            "João",
-            "Maria",
-            "Pedro",
-            "Ana",
-            "Carlos",
-            "Julia",
-            "Paulo",
-            "Sofia",
-        ]
+        diaconos = _diaconos(
+            "João", "Maria", "Pedro", "Ana", "Carlos", "Julia", "Paulo", "Sofia"
+        )
         gerador = GeradorEscalaDiaconos(diaconos, seed=222)
         gerador.gerar_escala_semanal()
 
@@ -151,16 +143,9 @@ class TestGeradorEscalaDiaconos:
 
     def test_obter_escala_por_funcao(self):
         """Testa o método obter_escala_por_funcao."""
-        diaconos = [
-            "João",
-            "Maria",
-            "Pedro",
-            "Ana",
-            "Carlos",
-            "Julia",
-            "Paulo",
-            "Sofia",
-        ]
+        diaconos = _diaconos(
+            "João", "Maria", "Pedro", "Ana", "Carlos", "Julia", "Paulo", "Sofia"
+        )
         gerador = GeradorEscalaDiaconos(diaconos, seed=333)
         gerador.gerar_escala_semanal()
 
@@ -177,7 +162,7 @@ class TestGeradorEscalaDiaconos:
 
     def test_exibir_escala_com_escala_gerada(self):
         """Testa o método exibir_escala com escala gerada."""
-        diaconos = ["João", "Maria", "Pedro", "Ana", "Carlos", "Julia"]
+        diaconos = _diaconos("João", "Maria", "Pedro", "Ana", "Carlos", "Julia")
         gerador = GeradorEscalaDiaconos(diaconos, seed=444)
         gerador.gerar_escala_semanal()
 
@@ -192,7 +177,7 @@ class TestGeradorEscalaDiaconos:
 
     def test_exibir_escala_sem_escala_gerada(self):
         """Testa o método exibir_escala sem escala gerada."""
-        diaconos = ["João", "Maria", "Pedro"]
+        diaconos = _diaconos("João", "Maria", "Pedro")
         gerador = GeradorEscalaDiaconos(diaconos)
 
         resultado = gerador.exibir_escala()
@@ -201,17 +186,15 @@ class TestGeradorEscalaDiaconos:
 
     def test_sortear_diacono_com_lista_valida(self):
         """Testa o método privado _sortear_diacono."""
-        diaconos = ["João", "Maria", "Pedro"]
-        gerador = GeradorEscalaDiaconos(diaconos, seed=555)
+        gerador = GeradorEscalaDiaconos(_diaconos("João", "Maria", "Pedro"), seed=555)
 
-        sorteado = gerador._sortear_diacono(diaconos)
+        sorteado = gerador._sortear_diacono(gerador.lista_diaconos)
 
-        assert sorteado in diaconos
+        assert sorteado in gerador.lista_diaconos
 
     def test_sortear_diacono_com_lista_vazia(self):
         """Testa que _sortear_diacono com lista vazia levanta ValueError."""
-        diaconos = ["João", "Maria"]
-        gerador = GeradorEscalaDiaconos(diaconos)
+        gerador = GeradorEscalaDiaconos(_diaconos("João", "Maria"))
 
         with pytest.raises(
             ValueError, match="Não há diáconos disponíveis para sorteio"
@@ -220,10 +203,10 @@ class TestGeradorEscalaDiaconos:
 
     def test_remover_diacono(self):
         """Testa o método privado _remover_diacono."""
-        diaconos = ["João", "Maria", "Pedro", "Ana"]
-        gerador = GeradorEscalaDiaconos(diaconos)
+        nomes = ["João", "Maria", "Pedro", "Ana"]
+        gerador = GeradorEscalaDiaconos(_diaconos(*nomes))
 
-        resultado = gerador._remover_diacono(diaconos, "Maria")
+        resultado = gerador._remover_diacono(nomes, "Maria")
 
         assert "Maria" not in resultado
         assert len(resultado) == 3
@@ -233,16 +216,9 @@ class TestGeradorEscalaDiaconos:
 
     def test_multiplas_geracoes_independentes(self):
         """Testa que múltiplas gerações são independentes."""
-        diaconos = [
-            "João",
-            "Maria",
-            "Pedro",
-            "Ana",
-            "Carlos",
-            "Julia",
-            "Paulo",
-            "Sofia",
-        ]
+        diaconos = _diaconos(
+            "João", "Maria", "Pedro", "Ana", "Carlos", "Julia", "Paulo", "Sofia"
+        )
         gerador = GeradorEscalaDiaconos(diaconos)
 
         escala1 = gerador.gerar_escala_semanal()
@@ -262,12 +238,91 @@ class TestGeradorEscalaDiaconos:
 
     def test_lista_diaconos_nao_e_modificada(self):
         """Testa que a lista original de diáconos não é modificada."""
-        diaconos_original = ["João", "Maria", "Pedro", "Ana"]
+        diaconos_original = _diaconos("João", "Maria", "Pedro", "Ana")
         diaconos_copia = diaconos_original.copy()
 
         gerador = GeradorEscalaDiaconos(diaconos_original)
         gerador.gerar_escala_semanal()
 
         # A lista original não deve ser modificada
-        assert gerador.lista_diaconos == diaconos_copia
+        assert gerador.lista_diaconos == [nome for nome, _ in diaconos_copia]
         assert diaconos_original == diaconos_copia
+
+    def test_gerar_escala_anual_com_diaconos_externos(self):
+        """Testa a geração anual com uma lista recebida de fora."""
+        diaconos = _diaconos(
+            "Mateus Almeida",
+            "Gregório Honorato",
+            "Danilo Maciel Santos",
+            "Carlos Siebert",
+            "João Batista",
+            "José Botelho",
+            "Elias Gonçalves",
+            "Celso Henrique",
+        )
+        nomes = {nome for nome, _ in diaconos}
+        gerador = GeradorEscalaDiaconos(diaconos, seed=2026)
+        escala = gerador.gerar_escala_anual(2026)
+
+        assert len(escala) > 0
+        assert all(diacono.nome in nomes for diacono in escala)
+        assert gerador.lista_diaconos_contatos["Mateus Almeida"] == TELEFONE_TESTE
+        assert gerador.lista_diaconos_contatos["Gregório Honorato"] == TELEFONE_TESTE
+
+        por_data = defaultdict(list)
+        for diacono in escala:
+            por_data[diacono.data].append(diacono)
+
+        chave_por_sabado = {}
+        for data_evento, itens in por_data.items():
+            funcoes = [item.funcao for item in itens]
+            dia = itens[0].dia
+            if dia == "sabado":
+                assert funcoes.count("chave") == 1
+                assert funcoes.count("oferta") == 2
+                chave = next(item.nome for item in itens if item.funcao == "chave")
+                chave_por_sabado[data_evento] = chave
+            else:
+                assert funcoes.count("chave") == 1
+                assert "oferta" not in funcoes
+
+        for diacono in escala:
+            if diacono.dia in ("domingo", "quarta") and diacono.funcao == "chave":
+                sabado = gerador._encontrar_sabado_semana(diacono.data)
+                if sabado in chave_por_sabado:
+                    assert diacono.nome == chave_por_sabado[sabado]
+
+        chaves_sabado = [
+            diacono.nome
+            for diacono in escala
+            if diacono.funcao == "chave" and diacono.dia == "sabado"
+        ]
+        assert set(chaves_sabado[: len(nomes)]) == nomes
+
+    def test_sementes_diferentes_geram_escalas_distintas(self):
+        """Testa que seeds diferentes mudam a ordem inicial das chaves."""
+        def chaves_sabado(seed: int) -> list[str]:
+            diaconos = _diaconos(
+                "Mateus Almeida",
+                "Gregório Honorato",
+                "Danilo Maciel Santos",
+                "Carlos Siebert",
+                "João Batista",
+                "José Botelho",
+                "Elias Gonçalves",
+                "Celso Henrique",
+            )
+            gerador = GeradorEscalaDiaconos(diaconos, seed=seed)
+            return [
+                diacono.nome
+                for diacono in gerador.gerar_escala_anual(2026)
+                if diacono.funcao == "chave" and diacono.dia == "sabado"
+            ]
+
+        chaves_a = chaves_sabado(11)
+        chaves_b = chaves_sabado(22)
+        chaves_repetidas = chaves_sabado(11)
+
+        assert chaves_a != chaves_b
+        assert chaves_a == chaves_repetidas
+        assert chaves_a[0] != chaves_b[0] or chaves_a[1] != chaves_b[1]

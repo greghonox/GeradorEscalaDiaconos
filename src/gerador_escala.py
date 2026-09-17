@@ -46,6 +46,8 @@ class GeradorEscalaDiaconos:
         self.escala_gerada: List[DiaconoEscala] = []
         # Rastreamento de rotação circular para função "chave"
         self._chaves_usadas: List[str] = []
+        # Ordem da rotação de chaves (embaralhada por seed na geração anual)
+        self._ordem_chaves: List[str] = self.lista_diaconos.copy()
         # Mapeia a data do sábado para o diácono escolhido para chave
         self._chave_semanal: Dict[date, str] = {}
 
@@ -124,27 +126,25 @@ class GeradorEscalaDiaconos:
     def _obter_proximo_chave_circular(self) -> str:
         """
         Obtém o próximo diácono para função chave usando rotação circular.
-        Só repete um diácono após todos terem sido escolhidos.
+        A ordem da volta é definida por seed; só repete após todos servirem.
 
         Returns:
             Nome do próximo diácono para chave
         """
+        ordem = self._ordem_chaves or self.lista_diaconos
+
         # Se todos já foram usados, reinicia a lista
-        if len(self._chaves_usadas) >= len(self.lista_diaconos):
+        if len(self._chaves_usadas) >= len(ordem):
             self._chaves_usadas = []
 
         # Encontra diáconos ainda não usados nesta rodada
-        diaconos_disponiveis = [
-            d for d in self.lista_diaconos if d not in self._chaves_usadas
-        ]
+        diaconos_disponiveis = [d for d in ordem if d not in self._chaves_usadas]
 
         # Se não há disponíveis (não deveria acontecer), reinicia
         if not diaconos_disponiveis:
             self._chaves_usadas = []
-            diaconos_disponiveis = self.lista_diaconos.copy()
+            diaconos_disponiveis = ordem.copy()
 
-        # Em vez de sortear aleatoriamente, escolhe o primeiro da lista
-        # Isso garante que todos sejam escolhidos antes de qualquer repetição
         escolhido = diaconos_disponiveis[0]
         self._chaves_usadas.append(escolhido)
 
@@ -190,6 +190,8 @@ class GeradorEscalaDiaconos:
         self.escala_gerada = []
         self._chaves_usadas = []  # Reinicia o rastreamento de chaves
         self._chave_semanal = {}  # Reinicia o mapeamento semanal
+        self._ordem_chaves = self.lista_diaconos.copy()
+        random.shuffle(self._ordem_chaves)
 
         # Calcula todas as datas do ano
         datas_por_dia = self._calcular_datas_ano(ano)
